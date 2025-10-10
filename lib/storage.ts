@@ -13,10 +13,21 @@ export interface Group {
   yourTurn: boolean
 }
 
+export interface Notification {
+  id: number
+  type: "payment" | "reminder" | "group" | "success"
+  title: string
+  message: string
+  timestamp: string
+  read: boolean
+  groupId?: number
+}
+
 export interface AppState {
   hasCompletedOnboarding: boolean
   user: User | null
   groups: Group[]
+  notifications: Notification[]
 }
 
 const STORAGE_KEY = "migente_app_state"
@@ -28,6 +39,7 @@ export const storage = {
         hasCompletedOnboarding: false,
         user: null,
         groups: [],
+        notifications: [],
       }
     }
 
@@ -44,6 +56,7 @@ export const storage = {
       hasCompletedOnboarding: false,
       user: null,
       groups: [],
+      notifications: [],
     }
   },
 

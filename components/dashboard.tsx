@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
 import { Users, Plus, TrendingUp, Calendar, Bell, DollarSign, User } from "lucide-react"
 import { storage, type Group } from "@/lib/storage"
+import { NotificationsPanel } from "./notifications-panel"
 
 interface DashboardProps {
   user: { name: string; email: string }
@@ -15,13 +16,14 @@ interface DashboardProps {
 
 export function Dashboard({ user, onCreateGroup, onJoinGroup, onViewProfile }: DashboardProps) {
   const [groups, setGroups] = useState<Group[]>([])
+  const [showNotifications, setShowNotifications] = useState(false)
+  const [unreadCount, setUnreadCount] = useState(0)
 
   useEffect(() => {
     const state = storage.getState()
     if (state.groups.length > 0) {
       setGroups(state.groups)
     } else {
-      // Default demo groups if none exist
       const defaultGroups: Group[] = [
         {
           id: 1,
@@ -45,7 +47,17 @@ export function Dashboard({ user, onCreateGroup, onJoinGroup, onViewProfile }: D
       setGroups(defaultGroups)
       storage.setState({ groups: defaultGroups })
     }
+
+    const unread = state.notifications?.filter((n) => !n.read).length || 0
+    setUnreadCount(unread)
   }, [])
+
+  const handleCloseNotifications = () => {
+    setShowNotifications(false)
+    const state = storage.getState()
+    const unread = state.notifications?.filter((n) => !n.read).length || 0
+    setUnreadCount(unread)
+  }
 
   const totalSaved = groups.reduce((sum, group) => sum + group.totalAmount, 0)
 
@@ -60,8 +72,16 @@ export function Dashboard({ user, onCreateGroup, onJoinGroup, onViewProfile }: D
               <p className="text-primary-foreground/80 text-sm">Tu comunidad te espera</p>
             </div>
             <div className="flex items-center gap-2">
-              <button className="p-2 rounded-full bg-primary-foreground/20 hover:bg-primary-foreground/30 transition-colors">
+              <button
+                onClick={() => setShowNotifications(true)}
+                className="p-2 rounded-full bg-primary-foreground/20 hover:bg-primary-foreground/30 transition-colors relative"
+              >
                 <Bell className="w-6 h-6" />
+                {unreadCount > 0 && (
+                  <span className="absolute -top-1 -right-1 w-5 h-5 bg-accent text-accent-foreground text-xs font-bold rounded-full flex items-center justify-center">
+                    {unreadCount}
+                  </span>
+                )}
               </button>
               <button
                 onClick={onViewProfile}
@@ -166,6 +186,9 @@ export function Dashboard({ user, onCreateGroup, onJoinGroup, onViewProfile }: D
           </p>
         </Card>
       </div>
+
+      {/* Notifications Panel */}
+      {showNotifications && <NotificationsPanel onClose={handleCloseNotifications} />}
     </div>
   )
 }
