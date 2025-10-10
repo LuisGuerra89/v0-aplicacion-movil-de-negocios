@@ -1,35 +1,53 @@
 "use client"
 
+import { useEffect, useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
-import { Users, Plus, TrendingUp, Calendar, Bell, DollarSign } from "lucide-react"
+import { Users, Plus, TrendingUp, Calendar, Bell, DollarSign, User } from "lucide-react"
+import { storage, type Group } from "@/lib/storage"
 
 interface DashboardProps {
   user: { name: string; email: string }
   onCreateGroup: () => void
+  onJoinGroup: () => void
+  onViewProfile: () => void
 }
 
-export function Dashboard({ user, onCreateGroup }: DashboardProps) {
-  const groups = [
-    {
-      id: 1,
-      name: "Grupo Familia",
-      members: 8,
-      totalAmount: 4800,
-      monthlyAmount: 600,
-      nextPayment: "15 Nov 2025",
-      yourTurn: false,
-    },
-    {
-      id: 2,
-      name: "Compañeros Trabajo",
-      members: 12,
-      totalAmount: 7200,
-      monthlyAmount: 600,
-      nextPayment: "20 Nov 2025",
-      yourTurn: true,
-    },
-  ]
+export function Dashboard({ user, onCreateGroup, onJoinGroup, onViewProfile }: DashboardProps) {
+  const [groups, setGroups] = useState<Group[]>([])
+
+  useEffect(() => {
+    const state = storage.getState()
+    if (state.groups.length > 0) {
+      setGroups(state.groups)
+    } else {
+      // Default demo groups if none exist
+      const defaultGroups: Group[] = [
+        {
+          id: 1,
+          name: "Grupo Familia",
+          members: 8,
+          totalAmount: 4800,
+          monthlyAmount: 600,
+          nextPayment: "15 Nov 2025",
+          yourTurn: false,
+        },
+        {
+          id: 2,
+          name: "Compañeros Trabajo",
+          members: 12,
+          totalAmount: 7200,
+          monthlyAmount: 600,
+          nextPayment: "20 Nov 2025",
+          yourTurn: true,
+        },
+      ]
+      setGroups(defaultGroups)
+      storage.setState({ groups: defaultGroups })
+    }
+  }, [])
+
+  const totalSaved = groups.reduce((sum, group) => sum + group.totalAmount, 0)
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-secondary/30 to-background">
@@ -41,9 +59,17 @@ export function Dashboard({ user, onCreateGroup }: DashboardProps) {
               <h1 className="text-2xl font-bold">¡Hola, {user.name.split(" ")[0]}!</h1>
               <p className="text-primary-foreground/80 text-sm">Tu comunidad te espera</p>
             </div>
-            <button className="p-2 rounded-full bg-primary-foreground/20 hover:bg-primary-foreground/30 transition-colors">
-              <Bell className="w-6 h-6" />
-            </button>
+            <div className="flex items-center gap-2">
+              <button className="p-2 rounded-full bg-primary-foreground/20 hover:bg-primary-foreground/30 transition-colors">
+                <Bell className="w-6 h-6" />
+              </button>
+              <button
+                onClick={onViewProfile}
+                className="p-2 rounded-full bg-primary-foreground/20 hover:bg-primary-foreground/30 transition-colors"
+              >
+                <User className="w-6 h-6" />
+              </button>
+            </div>
           </div>
         </div>
       </div>
@@ -58,7 +84,7 @@ export function Dashboard({ user, onCreateGroup }: DashboardProps) {
               <TrendingUp className="w-5 h-5 text-primary" />
             </div>
             <div className="space-y-1">
-              <p className="text-4xl font-bold text-primary">$12,000</p>
+              <p className="text-4xl font-bold text-primary">${totalSaved.toLocaleString()}</p>
               <p className="text-sm text-muted-foreground">En {groups.length} grupos activos</p>
             </div>
           </div>
@@ -71,6 +97,7 @@ export function Dashboard({ user, onCreateGroup }: DashboardProps) {
             Crear grupo
           </Button>
           <Button
+            onClick={onJoinGroup}
             variant="outline"
             size="lg"
             className="h-24 flex-col gap-2 text-base font-semibold border-2 bg-transparent"

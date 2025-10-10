@@ -6,6 +6,7 @@ import { Card } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { ArrowLeft, Users, DollarSign, Calendar } from "lucide-react"
+import { storage } from "@/lib/storage"
 
 interface GroupCreationProps {
   onComplete: () => void
@@ -22,6 +23,21 @@ export function GroupCreation({ onComplete }: GroupCreationProps) {
     if (step < 3) {
       setStep(step + 1)
     } else {
+      const state = storage.getState()
+      const newGroup = {
+        id: Date.now(),
+        name: groupName,
+        members: Number.parseInt(groupSize),
+        totalAmount: 0,
+        monthlyAmount: Number.parseInt(monthlyAmount),
+        nextPayment: `${paymentDay} Dic 2025`,
+        yourTurn: false,
+      }
+
+      storage.setState({
+        groups: [...state.groups, newGroup],
+      })
+
       onComplete()
     }
   }
