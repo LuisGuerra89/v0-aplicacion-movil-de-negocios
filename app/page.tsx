@@ -28,11 +28,13 @@ export default function Home() {
   }
 
   return (
-    <main className="min-h-screen">
-      {currentScreen === "onboarding" && <OnboardingFlow onComplete={handleOnboardingComplete} />}
-      {currentScreen === "auth" && <AuthScreen onComplete={handleAuthComplete} />}
-      {currentScreen === "dashboard" && user && <Dashboard user={user} onCreateGroup={handleCreateGroup} />}
-      {currentScreen === "create-group" && <GroupCreation onComplete={handleGroupCreated} />}
+    <main className="min-h-screen bg-muted/30 flex items-center justify-center">
+      <div className="w-full max-w-md min-h-screen bg-background shadow-2xl">
+        {currentScreen === "onboarding" && <OnboardingFlow onComplete={handleOnboardingComplete} />}
+        {currentScreen === "auth" && <AuthScreen onComplete={handleAuthComplete} />}
+        {currentScreen === "dashboard" && user && <Dashboard user={user} onCreateGroup={handleCreateGroup} />}
+        {currentScreen === "create-group" && <GroupCreation onComplete={handleGroupCreated} />}
+      </div>
     </main>
   )
 }
